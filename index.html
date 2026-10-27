@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>贪吃蛇 & 俄罗斯方块</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            min-height: 100vh;
+        }
+        h1 {
+            margin-bottom: 12px;
+            font-size:22px;
+        }
+        .tab-wrap {
+            margin-bottom: 16px;
+        }
+        button.tab {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            background: #444;
+            color: #fff;
+            border-radius:6px;
+        }
+        button.tab.active {
+            background: #00b894;
+        }
+        .game-box {
+            display: none;
+            text-align: center;
+        }
+        .game-box.show {
+            display: block;
+        }
+        canvas {
+            border: 3px solid #00b894;
+            background: #0f0f1a;
+            max-width:100%;
+        }
+        .info {
+            margin: 8px 0;
+            font-size: 18px;
+        }
+        .ctrl-btn {
+            padding: 8px 14px;
+            margin: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .tip {
+            margin-top:8px;
+            color:#aaa;
+            font-size:13px;
+        }
+        /* 触屏方向按键 */
+        .dpad{
+            margin-top:12px;
+            display:grid;
+            grid-template-columns: repeat(3,70px);
+            gap:6px;
+            justify-content:center;
+        }
+        .dpad button{
+            width:70px;height:70px;
+            font-size:24px;
+            border:none;
+            border-radius:8px;
+            background:#2d3436;
+            color:white;
+        }
+        .dpad .empty{
+            background:transparent;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 贪吃蛇 & 俄罗斯方块</h1>
+    <div class="tab-wrap">
+        <button class="tab active" id="tabSnake">贪吃蛇</button>
+        <button class="tab" id="tabTetris">俄罗斯方块</button>
+    </div>
+
+    <div class="game-box show" id="snakeGame">
+        <div class="info">得分：<span id="snakeScore">0</span></div>
+        <canvas id="snakeCanvas" width="320" height="320"></canvas>
+        <div>
+            <button class="ctrl-btn" id="snakeStart">开始/暂停</button>
+            <button class="ctrl-btn" id="snakeReset">重置</button>
+        </div>
+        <div class="tip">方向键 ↑↓←→ / 下方按钮控制</div>
+        <div class="dpad">
+            <div class="empty"></div>
+            <button data-key="ArrowUp">↑</button>
+            <div class="empty"></div>
+            <button data-key="ArrowLeft">←</button>
+            <div class="empty"></div>
+            <button data-key="ArrowRight">→</button>
+            <div class="empty"></div>
+            <button data-key="ArrowDown">↓</button>
+            <div class="empty"></div>
+        </div>
+    </div>
+
+    <div class="game-box" id="tetrisGame">
+        <div class="info">得分：<span id="tetrisScore">0</span></div>
+        <canvas id="tetrisCanvas" width="240" height="480"></canvas>
+        <div>
+            <button class="ctrl-btn" id="tetrisStart">开始/暂停</button>
+            <button class="ctrl-btn" id="tetrisReset">重置</button>
+        </div>
+        <div class="tip">← →移动，↑旋转，↓加速</div>
+        <div class="dpad">
+            <div class="empty"></div>
+            <button data-key="ArrowUp">↻</button>
+            <div class="empty"></div>
+            <button data-key="ArrowLeft">←</button>
+            <div class="empty"></div>
+            <button data-key="ArrowRight">→</button>
+            <div class="empty"></div>
+            <button data-key="ArrowDown">↓</button>
+            <div class="empty"></div>
+        </div>
+    </div>
+
+<script>
+const tabSnake = document.getElementById('tabSnake');
+const tabTetris = document.getElementById('tabTetris');
+const snakeGame = document.getElementById('snakeGame');
+const tetrisGame = document.getElementById('tetrisGame');
+
+tabSnake.onclick = () => {
+    tabSnake.classList.add('active');
+    tabTetris.classList.remove('active');
+    snakeGame.classList.add('show');
+    tetrisGame.classList.remove('show');
+};
+tabTetris.onclick = () => {
+    tabTetris.classList.add('active');
+    tabSnake.classList.remove('active');
+    tetrisGame.classList.add('show');
+    snakeGame.classList.remove('show');
+};
+
+// 触屏按钮转发按键事件
+document.querySelectorAll('.dpad button').forEach(btn=>{
+    btn.onclick = ()=>{
+        const e = new KeyboardEvent('keydown', {key:btn.dataset.key});
+        document.dispatchEvent(e);
+   
